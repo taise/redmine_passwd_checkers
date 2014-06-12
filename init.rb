@@ -1,8 +1,16 @@
-Redmine::Plugin.register :redmine_passwd_checker do
-  name 'Redmine Passwd Checker plugin'
-  author 'Author name'
-  description 'This is a plugin for Redmine'
+require 'redmine'
+
+Redmine::Plugin.register :redmine_passwd_checkers do
+  name 'Redmine Passwd Checkers plugin'
+  author 'Yusaku Omasa'
+  description 'A plugin checks the users have changed the passsword.'
   version '0.0.1'
-  url 'http://example.com/path/to/plugin'
-  author_url 'http://example.com/about'
+
+  requires_redmine :version_or_higher => '2.1.0'
+end
+
+ActionDispatch::Callbacks.to_prepare do
+  unless UsersController.included_modules.include?(RedminePasswdCheckers::Patches::UsersControllerPatch)
+    UsersController.send(:include, RedminePasswdCheckers::Patches::UsersControllerPatch)
+  end
 end
