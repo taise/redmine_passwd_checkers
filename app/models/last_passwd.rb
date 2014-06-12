@@ -6,4 +6,8 @@ class LastPasswd < ActiveRecord::Base
   def default_values
     self.changed_at ||= Time.now
   end
+
+  def self.need_change_passwd?(user)
+    true
+  end
 end
