@@ -1,0 +1,3 @@
+= redmine_passwd_checker
+
+Description goes here
