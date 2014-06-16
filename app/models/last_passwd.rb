@@ -10,4 +10,12 @@ class LastPasswd < ActiveRecord::Base
   def self.need_change_passwd?(user)
     true
   end
+
+  def self.find_by_user(user)
+    LastPasswd.where(user_id: user).first
+  end
+
+  def need_change?
+    (Time.now - changed_at) > 3.month
+  end
 end
