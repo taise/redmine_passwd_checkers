@@ -1,3 +1,10 @@
 = redmine_passwd_checker
 
 Description goes here
+
+### test
+
+```
+$ bundle exec rspec plugin/redmine_passwd_checker/spec
+```
+
