@@ -1,25 +1,24 @@
 require File.expand_path('../../spec/spec_helper', __FILE__)
-require 'capybara/rspec'
 
-describe "passwd_checker", :type => :feature do
-  context "Login user never have LastPasswd" do
+describe "redmine_passwd_checker", :type => :feature do
+  context "The user never login" do
     it "creates new LastPasswd" do
       LastPasswd.find_by_user(admin).should be_nil
       login_as('admin', 'admin')
       LastPasswd.find_by_user(admin).should_not be_nil
     end
 
-    it "doesn't redirect to the password change page" do
+    it "redirect to my page" do
       login_as('jsmith', 'jsmith')
       current_path.should == '/my/page'
     end
   end
 
-  context "Login user already have LastPasswd" do
+  context "The user have logined once more" do
     before { login_as('dlopper', 'foo') }
 
     context "within 3 months from the password change" do
-      it "doesn't redirect to the password change page" do
+      it "redirect to my page" do
         update_changed_at(@user, 2.month.ago)
         logout
         login_as('dlopper', 'foo')
@@ -28,7 +27,7 @@ describe "passwd_checker", :type => :feature do
     end
 
     context "over 3 months from the password change" do
-      it "should redirect to the password change page" do
+      it "redirect to the password change page" do
         update_changed_at(@user, 3.month.ago)
         logout
         login_as('dlopper', 'foo')
