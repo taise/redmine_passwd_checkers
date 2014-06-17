@@ -1,4 +1,4 @@
-require File.expand_path('../../../spec/spec_helper', __FILE__)
+require File.expand_path('../../spec/spec_helper', __FILE__)
 
 describe "redmine_passwd_checker", :type => :feature do
   context "The user never login" do
