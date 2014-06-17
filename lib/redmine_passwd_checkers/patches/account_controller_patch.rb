@@ -15,8 +15,8 @@ module RedminePasswdCheckers
       module InstanceMethods
         def need_change_passwd
           if user = User.current
-            last_passwd = LastPasswd.find_by_user(user)
-            unless last_passwd
+            last_passwd = LastPasswd.find_by_user(user) || LastPasswd.new
+            unless last_passwd.user
               last_passwd.user = user
               last_passwd.save
             end

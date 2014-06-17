@@ -3,7 +3,6 @@ ENV['RAILS_ENV'] ||= 'test'
 # prevent case where we are using rubygems and test-unit 2.x is installed
 begin
   require 'rubygems'
-  gem 'test-unit', '~> 1.2.3'
 rescue LoadError
 end
 
@@ -22,6 +21,10 @@ rescue LoadError => error
   EOS
   raise error
 end
+
+require 'rspec/rails'
+require 'capybara/rails'
+require 'capybara/rspec'
 
 fixtures_path = File.expand_path('../../spec/fixtures', __FILE__)
 ActiveRecord::Fixtures.create_fixtures(fixtures_path, 'users')
