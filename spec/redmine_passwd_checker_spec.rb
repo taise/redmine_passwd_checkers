@@ -17,12 +17,22 @@ describe "passwd_checker", :type => :feature do
 
   context "Login user already have LastPasswd" do
     before { login_as('dlopper', 'foo') }
+
     context "within 3 months from the password change" do
       it "doesn't redirect to the password change page" do
         update_changed_at(@user, 2.month.ago)
         logout
         login_as('dlopper', 'foo')
         current_path.should == '/my/page'
+      end
+    end
+
+    context "over 3 months from the password change" do
+      it "should redirect to the password change page" do
+        update_changed_at(@user, 3.month.ago)
+        logout
+        login_as('dlopper', 'foo')
+        current_path.should == '/my/password'
       end
     end
   end
