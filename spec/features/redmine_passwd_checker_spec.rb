@@ -1,4 +1,4 @@
-require File.expand_path('../../spec/spec_helper', __FILE__)
+require File.expand_path('../../../spec/spec_helper', __FILE__)
 
 describe "redmine_passwd_checker", :type => :feature do
   context "The user never login" do
@@ -33,6 +33,23 @@ describe "redmine_passwd_checker", :type => :feature do
         login_as('dlopper', 'foo')
         current_path.should == '/my/password'
       end
+
+      # Routing path
+      #  default:              /login       => /my/page
+      #  need_change_password: /login       => /my/password
+      #  password_changed:     /my/password => /my/account
+      it "shouldn't change password within 3 month after change" do
+        update_changed_at(@user, 3.month.ago)
+        logout
+
+        login_as('dlopper', 'foo')
+        change_password('foo', 'newfoobar')
+        current_path.should == '/my/account'
+
+        logout
+        login_as('dlopper', 'newfoobar')
+        current_path.should == '/my/page'
+      end
     end
   end
 end
@@ -47,7 +64,14 @@ end
 
 def logout
   visit '/logout'
-  page.find(:xpath, '//input[@value="Sign out"]').click
+  page.find(:xpath, '//input[@name="commit"]').click
+end
+
+def change_password(password, new_password)
+  fill_in 'password',     :with => password
+  fill_in 'new_password', :with => new_password
+  fill_in 'new_password_confirmation', :with => new_password
+  page.find(:xpath, '//input[@name="commit"]').click
 end
 
 def admin
