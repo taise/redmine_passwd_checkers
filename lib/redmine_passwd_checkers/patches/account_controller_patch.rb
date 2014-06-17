@@ -8,19 +8,18 @@ module RedminePasswdCheckers
 
         base.class_eval do
           unloadable
-          after_filter :need_change_passwd, :only => [:login]
+          after_filter :passwd_expired_check, :only => [:login]
         end
       end
 
       module InstanceMethods
-        def need_change_passwd
+        def passwd_expired_check
           if user = User.current
-            last_passwd = LastPasswd.find_by_user(user) || LastPasswd.new
-            unless last_passwd.user
-              last_passwd.user = user
-              last_passwd.save
-            end
-            if last_passwd.need_change?
+            if user.last_passwd.nil?
+              user.last_passwd = LastPasswd.new
+              user.last_passwd.save
+            elsif user.last_passwd.expired?
+              # before_filter check_password_change is check conditions
               user.update_column(:must_change_passwd, true)
               session[:pwd] = 1
             end

@@ -3,9 +3,9 @@ require File.expand_path('../../../spec/spec_helper', __FILE__)
 describe "redmine_passwd_checker", :type => :feature do
   context "The user never login" do
     it "creates new LastPasswd" do
-      LastPasswd.find_by_user(admin).should be_nil
+      User.find_by_login('admin').last_passwd.should be_nil
       login_as('admin', 'admin')
-      LastPasswd.find_by_user(admin).should_not be_nil
+      User.find_by_login('admin').last_passwd.should_not be_nil
     end
 
     it "redirect to my page" do
@@ -19,7 +19,7 @@ describe "redmine_passwd_checker", :type => :feature do
 
     context "within 3 months from the password change" do
       it "redirect to my page" do
-        update_changed_at(@user, 2.month.ago)
+        update_changed_at(@user, 2.months.ago)
         logout
         login_as('dlopper', 'foo')
         current_path.should == '/my/page'
@@ -28,7 +28,7 @@ describe "redmine_passwd_checker", :type => :feature do
 
     context "over 3 months from the password change" do
       it "redirect to the password change page" do
-        update_changed_at(@user, 3.month.ago)
+        update_changed_at(@user, 3.months.ago)
         logout
         login_as('dlopper', 'foo')
         current_path.should == '/my/password'
@@ -39,7 +39,7 @@ describe "redmine_passwd_checker", :type => :feature do
       #  need_change_password: /login       => /my/password
       #  password_changed:     /my/password => /my/account
       it "shouldn't change password within 3 month after change" do
-        update_changed_at(@user, 3.month.ago)
+        update_changed_at(@user, 3.months.ago)
         logout
 
         login_as('dlopper', 'foo')
@@ -79,7 +79,5 @@ def admin
 end
 
 def update_changed_at(user, changed_at)
-  last_passwd = LastPasswd.find_by_user(user)
-  last_passwd.changed_at = changed_at
-  last_passwd.save
+  user.last_passwd.update_column(:changed_at, changed_at)
 end

@@ -9,15 +9,16 @@ module RedminePasswdCheckers
 
         base.class_eval do
           unloadable
-          before_save :last_passwd_update
+          has_one :last_passwd
+          before_save :update_last_passwd
         end
       end
 
       module InstanceMethods
-        def last_passwd_update
+        def update_last_passwd
           if user = User.find(id)
             if user.password != password
-              last_passwd = LastPasswd.find_by_user(id)
+              last_passwd = user.last_passwd
               last_passwd.update_column(:changed_at, Time.now)
             end
           end
