@@ -1,4 +1,4 @@
-# redmine_passwd_checker
+# Redmine passwd checker
 
 This plugin is checking the password expiration.  
 The password expiration limit is 3 months.
@@ -9,7 +9,7 @@ Clone into the plugins directory.
 
 ```
 $ cd /path/to/your/redmine
-$ git clone git@github.com:taise/redmine_passwd_checker.git plugins
+$ git clone git@github.com:taise/redmine_passwd_checkers.git plugins/redmine_passwd_checkers
 $ bundle install
 $ bundle exec rake redmine:plugins:migrate
 ```
@@ -21,6 +21,6 @@ $ cd /path/to/your/redmine
 $ bundle install
 $ bundle exec rails generate rspec:install
 $ bundle exec rake redmine:plugins:migrate
-$ bundle exec rspec plugin/redmine_passwd_checker/spec
+$ bundle exec rspec plugin/redmine_passwd_checkers/spec
 ```
 
