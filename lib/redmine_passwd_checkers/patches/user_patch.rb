@@ -16,7 +16,8 @@ module RedminePasswdCheckers
 
       module InstanceMethods
         def update_last_passwd
-          if user = User.find(id)
+          user = User.find(id)
+          if user && user.last_passwd
             if user.password != password
               last_passwd = user.last_passwd
               last_passwd.update_column(:changed_at, Time.now)

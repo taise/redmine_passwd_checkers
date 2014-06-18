@@ -17,36 +17,49 @@ describe "redmine_passwd_checker", :type => :feature do
   context "The user have logined once more" do
     before { login_as('dlopper', 'foo') }
 
-    context "within 3 months from the password change" do
+    context "within the expiration time" do
       it "redirect to my page" do
         update_changed_at(@user, 2.months.ago)
         logout
         login_as('dlopper', 'foo')
         current_path.should == '/my/page'
       end
+
+      context "change password within " do
+        it "shouldn't change password" do
+          visit '/my/password'
+          change_password('foo', 'newfoobar')
+          current_path.should == '/my/account'
+
+          logout
+          login_as('dlopper', 'newfoobar')
+          current_path.should == '/my/page'
+        end
+      end
     end
 
-    context "over 3 months from the password change" do
+    # Routing path
+    #  default:              /login       => /my/page
+    #  need_change_password: /login       => /my/password
+    #  password_changed:     /my/password => /my/account
+    context "expired the password" do
       it "redirect to the password change page" do
         update_changed_at(@user, 3.months.ago)
         logout
+
         login_as('dlopper', 'foo')
         current_path.should == '/my/password'
       end
 
-      # Routing path
-      #  default:              /login       => /my/page
-      #  need_change_password: /login       => /my/password
-      #  password_changed:     /my/password => /my/account
-      it "shouldn't change password within 3 month after change" do
+      it "shouldn't change password within 3 months" do
         update_changed_at(@user, 3.months.ago)
         logout
 
         login_as('dlopper', 'foo')
         change_password('foo', 'newfoobar')
         current_path.should == '/my/account'
-
         logout
+
         login_as('dlopper', 'newfoobar')
         current_path.should == '/my/page'
       end
