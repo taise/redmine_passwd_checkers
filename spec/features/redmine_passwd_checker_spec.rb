@@ -1,6 +1,28 @@
 require File.expand_path('../../../spec/spec_helper', __FILE__)
 
 describe "redmine_passwd_checker", :type => :feature do
+  context "Create new user" do
+    before {
+      new_user = User.find_by_login('new_user')
+      new_user.destroy unless new_user.nil?
+    }
+    it "success to create new user" do
+      User.find_by_login('new_user').should be_nil
+      login_as('admin', 'admin')
+      visit '/users/new'
+      fill_in 'user_login',                 :with => 'new_user'
+      fill_in 'user_firstname',             :with => 'Alice'
+      fill_in 'user_lastname',              :with => 'Bobson'
+      fill_in 'user_mail',                  :with => 'new_user@email.com'
+      fill_in 'user_password',              :with => 'new_password'
+      fill_in 'user_password_confirmation', :with => 'new_password'
+      page.find(:xpath, '//input[@name="commit"]').click
+
+      user = User.find_by_login('new_user')
+      current_path.should == "/users/#{user.id}/edit"
+    end
+  end
+
   context "The user never login" do
     it "creates new LastPasswd" do
       User.find_by_login('admin').last_passwd.should be_nil
