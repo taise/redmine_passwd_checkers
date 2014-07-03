@@ -3,27 +3,17 @@ require File.expand_path('../../../spec/spec_helper', __FILE__)
 describe "redmine_passwd_checker", :type => :feature do
   context "Create new user" do
     it "success to create new user" do
-      User.find_by_login('new_user').should be_nil
       login_as('admin', 'admin')
-      visit '/users/new'
-      fill_in 'user_login',                 :with => 'new_user'
-      fill_in 'user_firstname',             :with => 'Alice'
-      fill_in 'user_lastname',              :with => 'Bobson'
-      fill_in 'user_mail',                  :with => 'new_user@email.com'
-      fill_in 'user_password',              :with => 'new_password'
-      fill_in 'user_password_confirmation', :with => 'new_password'
-      page.find(:xpath, '//input[@name="commit"]').click
-
-      user = User.find_by_login('new_user')
-      current_path.should == "/users/#{user.id}/edit"
+      create_user(new_user)
+      current_path.should == "/users/#{new_user.id}/edit"
     end
   end
 
   context "The user never login" do
     it "creates new LastPasswd" do
-      User.find_by_login('admin').last_passwd.should be_nil
+      admin.last_passwd.should be_nil
       login_as('admin', 'admin')
-      User.find_by_login('admin').last_passwd.should_not be_nil
+      admin.last_passwd.should_not be_nil
     end
 
     it "redirect to my page" do
@@ -85,6 +75,34 @@ describe "redmine_passwd_checker", :type => :feature do
   end
 end
 
+
+def new_user
+  unless user = User.find_by_login('new_user')
+    user = User.new
+    user.login      = 'new_user'
+    user.firstname  = 'Alice'
+    user.lastname   = 'Bobson'
+    user.mail       = 'new_user@email.com'
+    user.password   = 'new_password'
+  end
+  user
+end
+
+def create_user(user)
+      visit '/users/new'
+      fill_in 'user_login',                 :with => user.login
+      fill_in 'user_firstname',             :with => user.firstname
+      fill_in 'user_lastname',              :with => user.lastname
+      fill_in 'user_mail',                  :with => user.mail
+      fill_in 'user_password',              :with => user.password
+      fill_in 'user_password_confirmation', :with => user.password
+      page.find(:xpath, '//input[@name="commit"]').click
+end
+
+def admin
+  User.find_by_login('admin')
+end
+
 def login_as(username, password)
   visit '/login'
   fill_in 'username', :with => username
@@ -103,10 +121,6 @@ def change_password(password, new_password)
   fill_in 'new_password', :with => new_password
   fill_in 'new_password_confirmation', :with => new_password
   page.find(:xpath, '//input[@name="commit"]').click
-end
-
-def admin
-  User.where(:login => 'admin').first
 end
 
 def update_changed_at(user, changed_at)
