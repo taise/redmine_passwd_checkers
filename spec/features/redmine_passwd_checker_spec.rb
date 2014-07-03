@@ -2,10 +2,6 @@ require File.expand_path('../../../spec/spec_helper', __FILE__)
 
 describe "redmine_passwd_checker", :type => :feature do
   context "Create new user" do
-    before {
-      new_user = User.find_by_login('new_user')
-      new_user.destroy unless new_user.nil?
-    }
     it "success to create new user" do
       User.find_by_login('new_user').should be_nil
       login_as('admin', 'admin')
