@@ -36,3 +36,17 @@ context 'check password expiration'
     change_password(today)
     login('bob')
     current_page '/my/page'
+
+
+describe 'last_passwd'
+  context 'first login'
+    user.last_passwd.should be_nil
+    login('eve')
+    user.last_passwd.should_not be_nil
+
+  context 'second login'
+    user.last_passwd.should_not be_nil
+  
+  context 'change password'
+    user.last_passwd.changed_at.updated
+
