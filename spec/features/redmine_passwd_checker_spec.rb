@@ -2,7 +2,7 @@ require File.expand_path('../../../spec/spec_helper', __FILE__)
 
 describe "redmine_passwd_checker", :type => :feature do
   context "Create new user" do
-    it "success to create new user" do
+    it "success to create" do
       login_as('admin', 'admin')
       create_user(new_user)
       current_path.should == "/users/#{new_user.id}/edit"
@@ -51,7 +51,7 @@ describe "redmine_passwd_checker", :type => :feature do
     #  need_change_password: /login       => /my/password
     #  password_changed:     /my/password => /my/account
     context "expired the password" do
-      it "redirect to the password change page" do
+      it "should change password over" do
         update_changed_at(@user, 3.months.ago)
         logout
 
@@ -59,7 +59,7 @@ describe "redmine_passwd_checker", :type => :feature do
         current_path.should == '/my/password'
       end
 
-      it "shouldn't change password within 3 months" do
+      it "shouldn't change password within" do
         update_changed_at(@user, 3.months.ago)
         logout
 
