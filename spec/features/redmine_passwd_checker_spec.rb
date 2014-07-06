@@ -3,9 +3,18 @@ require File.expand_path('../../../spec/spec_helper', __FILE__)
 describe "redmine_passwd_checker", :type => :feature do
   context "Create new user" do
     it "success to create" do
-      login_as('admin', 'admin')
-      create_user(new_user)
+      create_user_by_admin(new_user)
       current_path.should == "/users/#{new_user.id}/edit"
+    end
+  end
+
+  context "new user first login" do
+    it "redirect to my page" do
+      create_user_by_admin(new_user)
+      logout
+
+      login_as(new_user.login, new_user.password)
+      current_path.should == '/my/page'
     end
   end
 
@@ -83,8 +92,8 @@ def new_user
     user.firstname  = 'Alice'
     user.lastname   = 'Bobson'
     user.mail       = 'new_user@email.com'
-    user.password   = 'new_password'
   end
+  user.password   = 'new_password'
   user
 end
 
@@ -99,8 +108,15 @@ def create_user(user)
       page.find(:xpath, '//input[@name="commit"]').click
 end
 
+def create_user_by_admin(user)
+  login_as(admin.login, admin.password)
+  create_user(new_user)
+end
+
 def admin
-  User.find_by_login('admin')
+  admin = User.find_by_login('admin')
+  admin.password = 'admin'
+  admin
 end
 
 def login_as(username, password)
