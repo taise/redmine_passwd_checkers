@@ -19,12 +19,6 @@ describe "redmine_passwd_checker", :type => :feature do
   end
 
   context "The user never login" do
-    it "creates new LastPasswd" do
-      admin.last_passwd.should be_nil
-      login_as(admin.login, admin.password)
-      admin.last_passwd.should_not be_nil
-    end
-
     it "redirect to my page" do
       login_as('jsmith', 'jsmith')
       current_path.should == '/my/page'
