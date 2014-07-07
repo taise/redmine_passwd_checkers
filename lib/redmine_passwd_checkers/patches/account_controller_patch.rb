@@ -15,13 +15,15 @@ module RedminePasswdCheckers
       module InstanceMethods
         def passwd_expired_check
           if user = User.current
+            # It set for 'check_password_change' before_filter on ApplicationController.
+            # If user os setted 'must_change_passwd' and session[:pwd] has something value,
+            # it should be redirect to 'my_password_path'.
             if user.last_passwd.nil?
               user.last_passwd = LastPasswd.new
               user.last_passwd.save
+              user.update_column(:must_change_passwd, true)
+              session[:pwd] = 1
             elsif user.last_passwd.expired?
-              # It set for 'check_password_change' before_filter on ApplicationController.
-              # If user os setted 'must_change_passwd' and session[:pwd] has something value,
-              # it should be redirect to 'my_password_path'.
               user.update_column(:must_change_passwd, true)
               session[:pwd] = 1
             end

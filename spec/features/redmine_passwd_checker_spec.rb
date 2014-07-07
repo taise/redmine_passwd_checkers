@@ -13,42 +13,43 @@ describe "redmine_passwd_checker", :type => :feature do
     end
 
     context "new user first login" do
-      it "redirect to my page" do
+      it "redirect to password change page" do
         create_user_by_admin(new_user)
         logout
         login_as(new_user.login, new_user.password)
-        current_path.should == '/my/page'
+        current_path.should == '/my/password'
       end
     end
   end
 
   context "Existing user" do
     context "first login" do
-      it "redirect to my page" do
+      it "redirect to password change page" do
         login_as('jsmith', 'jsmith')
-        current_path.should == '/my/page'
+        current_path.should == '/my/password'
       end
     end
 
-    context "has logged in" do
-      before { login_as('dlopper', 'foo') }
+    context "login once more" do
+      before { 
+        login_as('dlopper', 'foo')
+        change_password('foo', 'password')
+      }
 
       context "within the expiration" do
         it "redirect to my page" do
           update_changed_at(@user, 2.months.ago)
           logout
-          login_as('dlopper', 'foo')
+          login_as('dlopper', 'password')
           current_path.should == '/my/page'
         end
 
-        context "change password" do
-          it "shouldn't change password" do
-            visit '/my/password'
-            change_password('foo', 'newfoobar')
+        context "change password within the expiration" do
+          it "shouldn't change password at login" do
             current_path.should == '/my/account'
 
             logout
-            login_as('dlopper', 'newfoobar')
+            login_as('dlopper', 'password')
             current_path.should == '/my/page'
           end
         end
@@ -59,7 +60,7 @@ describe "redmine_passwd_checker", :type => :feature do
           update_changed_at(@user, 3.months.ago)
           logout
 
-          login_as('dlopper', 'foo')
+          login_as('dlopper', 'password')
           current_path.should == '/my/password'
         end
 
@@ -67,12 +68,12 @@ describe "redmine_passwd_checker", :type => :feature do
           update_changed_at(@user, 3.months.ago)
           logout
 
-          login_as('dlopper', 'foo')
-          change_password('foo', 'newfoobar')
+          login_as('dlopper', 'password')
+          change_password('password', 'password_again')
           current_path.should == '/my/account'
           logout
 
-          login_as('dlopper', 'newfoobar')
+          login_as('dlopper', 'password_again')
           current_path.should == '/my/page'
         end
       end
@@ -107,6 +108,7 @@ end
 
 def create_user_by_admin(user)
   login_as(admin.login, admin.password)
+  change_password('admin', 'password')
   create_user(new_user)
 end
 
