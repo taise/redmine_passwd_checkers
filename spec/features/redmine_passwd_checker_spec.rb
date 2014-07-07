@@ -22,62 +22,63 @@ describe "redmine_passwd_checker", :type => :feature do
     end
   end
 
-  context "existing user login" do
+  context "Existing user" do
     context "first login" do
       it "redirect to my page" do
         login_as('jsmith', 'jsmith')
         current_path.should == '/my/page'
       end
     end
-  end
 
-  context "The user have logined once more" do
-    before { login_as('dlopper', 'foo') }
+    context "has logged in" do
+      before { login_as('dlopper', 'foo') }
 
-    context "within the expiration time" do
-      it "redirect to my page" do
-        update_changed_at(@user, 2.months.ago)
-        logout
-        login_as('dlopper', 'foo')
-        current_path.should == '/my/page'
+      context "within the expiration" do
+        it "redirect to my page" do
+          update_changed_at(@user, 2.months.ago)
+          logout
+          login_as('dlopper', 'foo')
+          current_path.should == '/my/page'
+        end
+
+        context "change password" do
+          it "shouldn't change password" do
+            visit '/my/password'
+            change_password('foo', 'newfoobar')
+            current_path.should == '/my/account'
+
+            logout
+            login_as('dlopper', 'newfoobar')
+            current_path.should == '/my/page'
+          end
+        end
       end
 
-      context "change password within " do
-        it "shouldn't change password" do
-          visit '/my/password'
+      context "expired the password" do
+        it "should change password" do
+          update_changed_at(@user, 3.months.ago)
+          logout
+
+          login_as('dlopper', 'foo')
+          current_path.should == '/my/password'
+        end
+
+        it "shouldn't change password within the expiration" do
+          update_changed_at(@user, 3.months.ago)
+          logout
+
+          login_as('dlopper', 'foo')
           change_password('foo', 'newfoobar')
           current_path.should == '/my/account'
-
           logout
+
           login_as('dlopper', 'newfoobar')
           current_path.should == '/my/page'
         end
       end
     end
-
-    context "expired the password" do
-      it "should change password over" do
-        update_changed_at(@user, 3.months.ago)
-        logout
-
-        login_as('dlopper', 'foo')
-        current_path.should == '/my/password'
-      end
-
-      it "shouldn't change password within" do
-        update_changed_at(@user, 3.months.ago)
-        logout
-
-        login_as('dlopper', 'foo')
-        change_password('foo', 'newfoobar')
-        current_path.should == '/my/account'
-        logout
-
-        login_as('dlopper', 'newfoobar')
-        current_path.should == '/my/page'
-      end
-    end
   end
+
 end
 
 
@@ -94,14 +95,14 @@ def new_user
 end
 
 def create_user(user)
-      visit '/users/new'
-      fill_in 'user_login',                 :with => user.login
-      fill_in 'user_firstname',             :with => user.firstname
-      fill_in 'user_lastname',              :with => user.lastname
-      fill_in 'user_mail',                  :with => user.mail
-      fill_in 'user_password',              :with => user.password
-      fill_in 'user_password_confirmation', :with => user.password
-      page.find(:xpath, '//input[@name="commit"]').click
+  visit '/users/new'
+  fill_in 'user_login',                 :with => user.login
+  fill_in 'user_firstname',             :with => user.firstname
+  fill_in 'user_lastname',              :with => user.lastname
+  fill_in 'user_mail',                  :with => user.mail
+  fill_in 'user_password',              :with => user.password
+  fill_in 'user_password_confirmation', :with => user.password
+  page.find(:xpath, '//input[@name="commit"]').click
 end
 
 def create_user_by_admin(user)
