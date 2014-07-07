@@ -1,27 +1,33 @@
 require File.expand_path('../../../spec/spec_helper', __FILE__)
 
+# Routing path
+#  default:              /login       => /my/page
+#  need_change_password: /login       => /my/password
+#  password_changed:     /my/password => /my/account
+
 describe "redmine_passwd_checker", :type => :feature do
   context "Create new user" do
     it "success to create" do
       create_user_by_admin(new_user)
       current_path.should == "/users/#{new_user.id}/edit"
     end
-  end
 
-  context "new user first login" do
-    it "redirect to my page" do
-      create_user_by_admin(new_user)
-      logout
-
-      login_as(new_user.login, new_user.password)
-      current_path.should == '/my/page'
+    context "new user first login" do
+      it "redirect to my page" do
+        create_user_by_admin(new_user)
+        logout
+        login_as(new_user.login, new_user.password)
+        current_path.should == '/my/page'
+      end
     end
   end
 
-  context "The user never login" do
-    it "redirect to my page" do
-      login_as('jsmith', 'jsmith')
-      current_path.should == '/my/page'
+  context "existing user login" do
+    context "first login" do
+      it "redirect to my page" do
+        login_as('jsmith', 'jsmith')
+        current_path.should == '/my/page'
+      end
     end
   end
 
@@ -49,10 +55,6 @@ describe "redmine_passwd_checker", :type => :feature do
       end
     end
 
-    # Routing path
-    #  default:              /login       => /my/page
-    #  need_change_password: /login       => /my/password
-    #  password_changed:     /my/password => /my/account
     context "expired the password" do
       it "should change password over" do
         update_changed_at(@user, 3.months.ago)
